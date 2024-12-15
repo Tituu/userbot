@@ -212,17 +212,16 @@ async def welcome_user(event):
             parse_mode="md"
         )
 
-        # Delete welcome message after 5-10 seconds
-        await asyncio.sleep(5)
-        await welcome_message.delete()
-
-        # Log the join event in the log channel
-        await client.send_message(
-            LOG_CHANNEL_ID,
-            f"👤 New user joined: [@{user.username}](tg://user?id={user.id}) in {chat.title}.",
-            parse_mode="md"
-        )
-
+        # Safely resolve LOG_CHANNEL_ID
+        try:
+            log_channel = await client.get_entity(LOG_CHANNEL_ID)
+            await client.send_message(
+                log_channel,
+                f"👤 New user joined: [@{user.username}](tg://user?id={user.id}) in {chat.title}.",
+                parse_mode="md"
+            )
+        except Exception as e:
+            print(f"Failed to send log message: {e}")
 # Start the client
 print("Userbot is running...")
 client.start()
