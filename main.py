@@ -21,7 +21,7 @@ SPOTIFY_CLIENT_SECRET = '324418a4767d4076a75b2488dc85ffb7'
 OWNER_ID = 7654734465  # Replace with your Telegram User ID
 
 # Log channel ID
-LOG_CHANNEL_ID = '-1002340678637'  # Replace with your log channel ID
+LOG_CHANNEL_ID = '2340678637'  # Replace with your log channel ID
 
 # Initialize Spotify client
 sp = Spotify(client_credentials_manager=SpotifyClientCredentials(
