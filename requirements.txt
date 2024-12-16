@@ -1,8 +1,2 @@
 python-telegram-bot==13.15
 google-api-python-client==2.155.0
-discovery
-telethon
-pytube
-yt-dlp
-spotipy
-asyncio
