@@ -1,26 +1,29 @@
-import requests
+import os
+import logging
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
-    filters,
     ContextTypes,
+    filters,
 )
-import logging
+from telegram.error import Conflict
+import requests
 
 # Configure logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(name)
 
-# Constants
-TELEGRAM_BOT_TOKEN = "7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw"
-BLOGGER_API_KEY = "AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q"
-BLOG_ID = "1359530524392796723"
+# Environment variables
+TELEGRAM_BOT_TOKEN = os.getenv("7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw")
+BLOGGER_API_KEY = os.getenv("AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q")
+BLOG_ID = os.getenv("1359530524392796723")
+WEBHOOK_URL = os.getenv("implicit-ashleigh-rahulpython-b9c90083.koyeb.app/")  # Use the Koyeb app URL
 
-# Function to search Blogger posts via HTTP requests
+# Function to search Blogger posts
 def search_blogger_posts(query):
     url = f"https://www.googleapis.com/blogger/v3/blogs/{BLOG_ID}/posts"
     params = {"key": BLOGGER_API_KEY, "q": query}
@@ -57,17 +60,30 @@ async def search_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Sorry, no related blog posts were found.")
 
-# Main function to start the bot
-def main():
+# Main function
+async def main():
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search_movie))
 
-    # Start the bot
-    logger.info("Bot started!")
-    app.run_polling()
+    # Set webhook
+    logger.info("Setting webhook...")
+    try:
+        await app.bot.set_webhook(WEBHOOK_URL)
+        logger.info(f"Webhook set to {WEBHOOK_URL}")
+    except Conflict:
+        logger.warning("Webhook already set by another bot instance.")
 
-if __name__ == "__main__":
-    main()
+    # Start the webhook server
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=8080,
+        webhook_url=WEBHOOK_URL,
+    )
+
+
+if name == "main":
+    import asyncio
+    asyncio.run(main())
