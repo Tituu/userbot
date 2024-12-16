@@ -15,13 +15,13 @@ import requests
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
-logger = logging.getLogger(name)
+logger = logging.getLogger(__name__)  # Corrected here
 
 # Environment variables
 TELEGRAM_BOT_TOKEN = os.getenv("7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw")
 BLOGGER_API_KEY = os.getenv("AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q")
 BLOG_ID = os.getenv("1359530524392796723")
-WEBHOOK_URL = os.getenv("implicit-ashleigh-rahulpython-b9c90083.koyeb.app/")  # Use the Koyeb app URL
+WEBHOOK_URL = os.getenv("https://implicit-ashleigh-rahulpython-b9c90083.koyeb.app/")  # Use the Koyeb app URL
 
 # Function to search Blogger posts
 def search_blogger_posts(query):
@@ -31,7 +31,12 @@ def search_blogger_posts(query):
         response = requests.get(url, params=params)
         response.raise_for_status()
         posts = response.json().get("items", [])
-        return posts
+        
+        # Filter posts based on title relevance to the query
+        filtered_posts = [
+            post for post in posts if query.lower() in post.get("title", "").lower()
+        ]
+        return filtered_posts
     except requests.RequestException as e:
         logger.error(f"Error searching Blogger: {e}")
         return []
@@ -44,7 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Message handler for movie search
 async def search_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.message.text
+    query = update.message.text.strip()
     await update.message.reply_text(f"Searching for '{query}'...")
 
     # Search for posts on Blogger
@@ -53,8 +58,8 @@ async def search_movie(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if posts:
         response_message = "Here are the related blog posts I found:\n\n"
         for post in posts:
-            title = post.get("title")
-            url = post.get("url")
+            title = post.get("title", "No title")
+            url = post.get("url", "No URL")
             response_message += f"{title}\n{url}\n\n"
         await update.message.reply_text(response_message)
     else:
@@ -84,6 +89,6 @@ async def main():
     )
 
 
-if name == "main":
+if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
