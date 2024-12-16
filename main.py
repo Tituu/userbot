@@ -1,3 +1,4 @@
+import requests
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -6,7 +7,6 @@ from telegram.ext import (
     filters,
     ContextTypes,
 )
-from googleapiclient.discovery import build
 import logging
 
 # Configure logging
@@ -20,14 +20,16 @@ TELEGRAM_BOT_TOKEN = "7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw"
 BLOGGER_API_KEY = "AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q"
 BLOG_ID = "1359530524392796723"
 
-# Function to search for posts in Blogger
+# Function to search Blogger posts via HTTP requests
 def search_blogger_posts(query):
-    service = build("blogger", "v3", developerKey=BLOGGER_API_KEY)
+    url = f"https://www.googleapis.com/blogger/v3/blogs/{BLOG_ID}/posts"
+    params = {"key": BLOGGER_API_KEY, "q": query}
     try:
-        response = service.posts().list(blogId=BLOG_ID, q=query).execute()
-        posts = response.get("items", [])
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        posts = response.json().get("items", [])
         return posts
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error(f"Error searching Blogger: {e}")
         return []
 
