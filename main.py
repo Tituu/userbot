@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)  # Corrected here
 
 # Environment variables
-TELEGRAM_BOT_TOKEN = os.getenv("7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw")
+TELEGRAM_BOT_TOKEN = os.getenv("7518490388:AAHYoc_ua5nXEkEGOJotuL9qRZBFLdYNgzE")
 BLOGGER_API_KEY = os.getenv("AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q")
 BLOG_ID = os.getenv("1359530524392796723")
 WEBHOOK_URL = os.getenv("https://implicit-ashleigh-rahulpython-b9c90083.koyeb.app/")  # Use the Koyeb app URL
