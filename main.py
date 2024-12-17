@@ -1,73 +1,90 @@
 import os
 import requests
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+from flask import Flask, request
+from telegram import Update, Bot
+from telegram.ext import Dispatcher, CommandHandler
 
-# --- Configurations ---
-# Initialize bot session login
-BOT_SESSION = '1BVtsOKEBuyQ_gtMdt7AyEz4iHMh5QiC2cLVEY-S3RafAH01Yy_HgFTvt-MLn3HtgoCCReavVIuClyEjA5P2slPtUmGZqhQKYU8ihl5-jsvnVv4_MacRK_qhqkK9d9j4w0qWmZNdOK27BvuH2YyXge1j37BahgBUUOM2uvMXAVSTEZmoHOlmZguKFWWyyoWBkJ1y5wOKR8BwReDgdCOlx1dbEeAk2WPxQmog6F7EySozjaxzbwuSaY0Q-WKCOwL1-gSvZZP4OO9Mz6j8emNEFvg2OLkt5Pq_dxLvc_G_1_9lBbZLVMYNhB-0-IprS8KNdCWkRjSf8scKe1IV5opmM1d2kipheYjs='  # Replace with actual session string
-BLOGGER_API_KEY = os.getenv("AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q")
-BLOG_ID = os.getenv("1359530524392796723")
-WEBHOOK_URL = os.getenv("https://tituu.koyeb.app/") 
+# Configuration
+TELEGRAM_BOT_TOKEN = os.getenv("7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw")  # Set this in your Koyeb environment
+BLOGGER_API_KEY = os.getenv("AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q")  # Set this in your Koyeb environment
+BLOG_ID = os.getenv("1359530524392796723")  # Set this in your Koyeb environment
+APP_URL = os.getenv("https://tituu.koyeb.app/")  # Your deployed Koyeb app URL
 
-# --- Functions ---
-def search_blogger_posts(query):
-    search_url = f"https://www.googleapis.com/blogger/v3/blogs/{BLOG_ID}/posts/search?q={query}&key={BLOGGER_API_KEY}"
-    response = requests.get(search_url)
-    
+# Initialize Flask app and bot
+app = Flask(__name__)
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
+dispatcher = Dispatcher(bot, None, workers=0)
+
+
+def fetch_blog_post(movie_name):
+    """
+    Fetches a blog post link from Blogger that matches the given movie name 
+    in the title or label.
+
+    Args:
+        movie_name (str): The name of the movie to search for.
+
+    Returns:
+        str: The blog post link or a 'Not found' message.
+    """
+    url = f"https://www.googleapis.com/blogger/v3/blogs/{BLOG_ID}/posts/search?q={movie_name}&key={BLOGGER_API_KEY}"
+    response = requests.get(url)
+
     if response.status_code == 200:
-        posts = response.json().get('items', [])
-        return posts
+        posts = response.json().get("items", [])
+        if posts:
+            return f"Found blog post: {posts[0].get('url', 'Not found')}"
+        else:
+            return f"No blog post found for the movie: {movie_name}"
     else:
-        print(f"Error: {response.status_code} - {response.text}")
-        return None
+        return f"Error: {response.status_code} - {response.text}"
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hello! Send me a movie name, and I'll find related blog posts for you!")
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.message.text
-    await update.message.reply_text(f"Searching for: {query}...")
+def start(update: Update, context):
+    """
+    Handles the /start command to greet the user.
+    """
+    update.message.reply_text("Welcome to the Movie Blog Fetcher Bot! Send me a movie name to find related blog posts.")
 
-    posts = search_blogger_posts(query)
-    
-    if posts:
-        response_text = ""
-        for post in posts[:5]:
-            title = post.get('title', 'No Title')
-            url = post.get('url', '#')
-            response_text += f"🔹 [{title}]({url})\n"
-        
-        await update.message.reply_text(response_text, parse_mode='Markdown', disable_web_page_preview=False)
+
+def fetch_movie_blog(update: Update, context):
+    """
+    Handles the user's message containing a movie name.
+    """
+    movie_name = update.message.text.strip()
+    if movie_name:
+        result = fetch_blog_post(movie_name)
+        update.message.reply_text(result)
     else:
-        await update.message.reply_text("Sorry, no posts found matching your query.")
+        update.message.reply_text("Please provide a movie name!")
 
-async def set_webhook():
-    webhook_url = f"{WEBHOOK_URL}/{TELEGRAM_BOT_TOKEN}"
-    response = requests.get(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook?url={webhook_url}")
-    if response.status_code == 200:
-        print("Webhook set successfully!")
+
+# Add command handlers
+dispatcher.add_handler(CommandHandler("start", start))
+
+
+@app.route(f"/{TELEGRAM_BOT_TOKEN}", methods=["POST"])
+def webhook():
+    """
+    Receives updates from Telegram and dispatches them to the bot.
+    """
+    update = Update.de_json(request.get_json(force=True), bot)
+    dispatcher.process_update(update)
+    return "OK", 200
+
+
+@app.route("/set_webhook", methods=["GET", "POST"])
+def set_webhook():
+    """
+    Sets the webhook for Telegram.
+    """
+    webhook_url = f"{APP_URL}/{TELEGRAM_BOT_TOKEN}"
+    success = bot.set_webhook(url=webhook_url)
+    if success:
+        return f"Webhook set to {webhook_url}", 200
     else:
-        print(f"Failed to set webhook: {response.text}")
+        return "Failed to set webhook", 400
 
-def main():
-    # Build the app
-    app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).updater(None).build()
-
-    # Add Handlers
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    # Set Webhook
-    import asyncio
-    asyncio.run(set_webhook())
-
-    # Start Webhook Server
-    app.run_webhook(
-        listen="0.0.0.0", 
-        port=int(os.environ.get('PORT', 8080)), 
-        webhook_url=f"{WEBHOOK_URL}/{TELEGRAM_BOT_TOKEN}"
-    )
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
