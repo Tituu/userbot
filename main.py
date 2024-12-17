@@ -12,7 +12,7 @@ APP_URL = os.getenv("https://tituu.koyeb.app/")  # Your deployed Koyeb app URL
 
 # Initialize Flask app and Telegram bot
 app = Flask(__name__)
-bot = Bot(token=7440925694:AAGXftYiMZyocu-KCncSzBOtxKQUC5okgyU)
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
 # Initialize the Application
 application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
