@@ -71,7 +71,7 @@ def webhook():
     update = Update.de_json(request.get_json(force=True), bot)
     bot.application.process_update(update)
     return "OK", 200
-/
+
 if __name__ == "__main__":
     from telegram.ext import ApplicationBuilder
     
