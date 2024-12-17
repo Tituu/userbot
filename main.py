@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # Constants
-TELEGRAM_BOT_TOKEN = "7518490388:AAHFxpu_qwJ0ojYjS7_CX1xjIahtamE-miw"
+TELEGRAM_BOT_TOKEN = "7440925694:AAGXftYiMZyocu-KCncSzBOtxKQUC5okgyU"
 BLOGGER_API_KEY = "AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q"
 BLOG_ID = "1359530524392796723"
 
