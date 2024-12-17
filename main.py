@@ -7,7 +7,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Messa
 TELEGRAM_BOT_TOKEN = os.getenv("7518490388:AAHYoc_ua5nXEkEGOJotuL9qRZBFLdYNgzE")
 BLOGGER_API_KEY = os.getenv("AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q")
 BLOG_ID = os.getenv("1359530524392796723")
-WEBHOOK_URL = os.getenv("https://implicit-ashleigh-rahulpython-b9c90083.koyeb.app/") 
+WEBHOOK_URL = os.getenv("https://tituu.koyeb.app/") 
 
 # --- Functions ---
 def search_blogger_posts(query):
