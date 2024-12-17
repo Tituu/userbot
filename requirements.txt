@@ -1,4 +1,2 @@
-python-telegram-bot
-requests
-google-api-python-client
-urllib3==1.26.15
+python-telegram-bot==20.8
+requests==2.31.0
