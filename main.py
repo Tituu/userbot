@@ -79,7 +79,7 @@ if __name__ == "__main__":
     application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Set Webhook
-    application.bot.set_webhook(url=WEBHOOK_URLl)
+    application.bot.set_webhook(url=WEBHOOK_URL)
     
     # Run Flask App
     port = int(os.environ.get("PORT", 5000))
