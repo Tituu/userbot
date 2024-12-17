@@ -60,6 +60,8 @@ from flask import Flask, request
 from telegram import Update
 import os
 
+WEBHOOK_URL = "https://tituu.koyeb.app/"
+
 # Create Flask app
 app = Flask(__name__)
 
@@ -69,7 +71,7 @@ def webhook():
     update = Update.de_json(request.get_json(force=True), bot)
     bot.application.process_update(update)
     return "OK", 200
-
+/
 if __name__ == "__main__":
     from telegram.ext import ApplicationBuilder
     
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Set Webhook
-    application.bot.set_webhook(url=webhook_url)
+    application.bot.set_webhook(url=WEBHOOK_URLl)
     
     # Run Flask App
     port = int(os.environ.get("PORT", 5000))
