@@ -8,7 +8,7 @@ from telegram.ext import (
 )
 
 # Constants
-TELEGRAM_BOT_TOKEN = "7440925694:AAGXftYiMZyocu-KCncSzBOtxKQUC5okgyU"
+TELEGRAM_BOT_TOKEN = "7469943747:AAFyszZAq57dcyXZWvLTN2ipYaqrtgLFaWY"
 BLOGGER_API_KEY = "AIzaSyBlRLhbsLfrud7GUXsIW8bG59lu5PGDp7Q"
 BLOG_ID = "1359530524392796723"
 
@@ -54,33 +54,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-from flask import Flask, request
-from telegram import Update
-import os
-
-WEBHOOK_URL = "https://tituu.koyeb.app/"
-
-# Create Flask app
-app = Flask(__name__)
-
-# Webhook route
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    update = Update.de_json(request.get_json(force=True), bot)
-    bot.application.process_update(update)
-    return "OK", 200
-
-if __name__ == "__main__":
-    from telegram.ext import ApplicationBuilder
-    
-    # Telegram Bot Setup
-    application = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
-
-    # Set Webhook
-    application.bot.set_webhook(url=WEBHOOK_URL)
-    
-    # Run Flask App
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="https://tituu.koyeb.app/", port=port)
